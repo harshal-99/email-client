@@ -1,18 +1,33 @@
-import { useMemo } from 'react';
+import { useEffect } from 'react';
 import { EmailCard } from './EmailCard.tsx';
+import { emailList } from '../../services';
+import { useAppDispatch, useAppSelector } from '../../hooks';
+import { addEmails, selectEmailIds, updateTotalEmails } from '../../reducers';
 
 export const EmailCardList = () => {
-	const emails = useMemo(() => {
-		const arr = new Array(10);
-		return arr.fill(0).map((_, i) => ({
-			id: i,
-			subject: `Email ${i}`,
-		}));
-	}, []);
+	const emailIds = useAppSelector(selectEmailIds);
+	console.log('emailIds', emailIds);
+	const dispatch = useAppDispatch();
+
+	useEffect(() => {
+		const controller = new AbortController();
+		emailList(1, controller.signal)
+			.then((res) => {
+				console.log(res);
+				dispatch(addEmails(res.list));
+				dispatch(updateTotalEmails(res.total));
+			})
+			.catch((e) => {
+				if (e.name !== 'CanceledError') {
+					console.error(e);
+				}
+			});
+		return () => controller.abort('component unmounted');
+	}, [dispatch]);
 	return (
 		<div>
-			{emails.map((email) => (
-				<EmailCard key={email.id} />
+			{emailIds.map((email) => (
+				<EmailCard key={email} id={email} />
 			))}
 		</div>
 	);

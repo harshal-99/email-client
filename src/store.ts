@@ -3,7 +3,7 @@ import emailReducer from './reducers/email.ts';
 
 export const store = configureStore({
 	reducer: {
-		counter: emailReducer,
+		email: emailReducer,
 	},
 });
 
